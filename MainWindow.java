@@ -21,7 +21,7 @@ public class MainWindow extends JFrame implements ClipboardOwner{
 
 
     private MainWindow() {
-        super("Name generator by yiotro");
+        super("Name gen by yiotro");
 
         init();
         createInterface();
