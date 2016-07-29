@@ -5,8 +5,10 @@ import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.*;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.StringTokenizer;
 
 public class MainWindow extends JFrame implements ClipboardOwner{
 
@@ -14,7 +16,7 @@ public class MainWindow extends JFrame implements ClipboardOwner{
     MainListener buttonListener;
     JTextArea groupsTextArea, masksTextArea, namesTextArea;
     JCheckBox checkBoxCapitalize;
-    JPanel groupsPanel, masksPanel, resultPanel;
+    JPanel mainPanel, groupsPanel, masksPanel, resultPanel;
     int frameWidth, frameHeight;
     NameGenerator nameGenerator;
     Font fontSegoe, fontMono;
@@ -25,6 +27,7 @@ public class MainWindow extends JFrame implements ClipboardOwner{
 
         init();
         createInterface();
+        load();
 
         setVisible(true);
         centerWindow();
@@ -33,6 +36,7 @@ public class MainWindow extends JFrame implements ClipboardOwner{
 
     private void createInterface() {
         createPanels();
+        createSaveButton();
         createTabbedPane();
         createGroupsTextArea();
         createMasksTextArea();
@@ -40,9 +44,24 @@ public class MainWindow extends JFrame implements ClipboardOwner{
     }
 
 
+    private void createSaveButton() {
+        JButton saveButton = new JButton("Save");
+        saveButton.setActionCommand("save");
+        saveButton.addActionListener(buttonListener);
+        saveButton.setFont(fontSegoe);
+        saveButton.setBounds(frameWidth - 98, 1, 90, 25);
+        mainPanel.add(saveButton);
+    }
+
+
     private void createResultTab() {
         createGenerateButton();
         createNamesArea();
+        createCapitalizeCheckBox();
+    }
+
+
+    private void createCapitalizeCheckBox() {
         checkBoxCapitalize = new JCheckBox("Capitalize name");
         checkBoxCapitalize.setSelected(true);
         checkBoxCapitalize.setFont(fontSegoe);
@@ -134,6 +153,8 @@ public class MainWindow extends JFrame implements ClipboardOwner{
 
 
     private void createPanels() {
+        mainPanel = new JPanel(null);
+        add(mainPanel, BorderLayout.CENTER);
         groupsPanel = new JPanel(new BorderLayout());
         masksPanel = new JPanel(new BorderLayout());
         resultPanel = new JPanel(new BorderLayout());
@@ -143,7 +164,8 @@ public class MainWindow extends JFrame implements ClipboardOwner{
     private void createTabbedPane() {
         JTabbedPane jTabbedPane = new JTabbedPane();
         jTabbedPane.setFont(fontSegoe);
-        add(jTabbedPane, BorderLayout.CENTER);
+        jTabbedPane.setBounds(0, 0, frameWidth - 4, frameHeight - 25);
+        mainPanel.add(jTabbedPane);
         jTabbedPane.addTab("Groups", groupsPanel);
         jTabbedPane.addTab("Masks", masksPanel);
         jTabbedPane.addTab("Result", resultPanel);
@@ -163,6 +185,92 @@ public class MainWindow extends JFrame implements ClipboardOwner{
     @Override
     public void lostOwnership(Clipboard clipboard, Transferable contents) {
 
+    }
+
+
+    void save() {
+        saveGroups();
+        saveMasks();
+    }
+
+
+    private void saveMasks() {
+        try {
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("masks.txt"), "Cp1251"));
+            String text = masksTextArea.getText();
+            StringTokenizer tokenizer = new StringTokenizer(text, "\n");
+            ArrayList<String> lines = new ArrayList<>();
+            while (tokenizer.hasMoreTokens()) {
+                lines.add(tokenizer.nextToken());
+            }
+            for (int i = 0; i < lines.size(); i++) {
+                writer.write(lines.get(i));
+                if (i < lines.size() - 1) {
+                    writer.newLine();
+                }
+            }
+            writer.close();
+        } catch (Exception ignored) {
+        }
+    }
+
+
+    private void saveGroups() {
+        try {
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("groups.txt"), "Cp1251"));
+            String text = groupsTextArea.getText();
+            StringTokenizer tokenizer = new StringTokenizer(text, "\n");
+            ArrayList<String> lines = new ArrayList<>();
+            while (tokenizer.hasMoreTokens()) {
+                lines.add(tokenizer.nextToken());
+            }
+            for (int i = 0; i < lines.size(); i++) {
+                writer.write(lines.get(i));
+                if (i < lines.size() - 1) {
+                    writer.newLine();
+                }
+            }
+            writer.close();
+        } catch (Exception ignored) {
+        }
+    }
+
+
+    void load() {
+        loadGroups();
+        loadMasks();
+    }
+
+
+    private void loadMasks() {
+        StringBuffer buffer = new StringBuffer();
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("masks.txt"), "Cp1251"));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.length() < 1) continue;
+                buffer.append(line + "\n");
+            }
+            reader.close();
+        } catch (IOException ignored) {
+        }
+        masksTextArea.setText(buffer.toString());
+    }
+
+
+    private void loadGroups() {
+        StringBuffer buffer = new StringBuffer();
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("groups.txt"), "Cp1251"));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.length() < 1) continue;
+                buffer.append(line + "\n");
+            }
+            reader.close();
+        } catch (IOException ignored) {
+        }
+        groupsTextArea.setText(buffer.toString());
     }
 
 

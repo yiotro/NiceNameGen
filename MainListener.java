@@ -14,6 +14,8 @@ class MainListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getActionCommand().equals("generate")) {
             mainWindow.generate();
+        } else if (e.getActionCommand().equals("save")) {
+            mainWindow.save();
         }
     }
 }
